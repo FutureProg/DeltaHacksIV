@@ -8,7 +8,8 @@ class BottomOptions extends React.Component{
 		return (
 			<View style={{position: 'absolute',bottom: 5,right: 10,flexDirection:'row'}}>
 				<Button raised icon={{name: 'refresh', color: 'black',type: 'font-awesome'}} title="" backgroundColor='white'/>
-				<Button raised icon={{name: 'location-arrow', color: 'black',type: 'font-awesome'}} backgroundColor='white'/>				
+				<Button raised icon={{name: 'location-arrow', color: 'black',type: 'font-awesome'}} backgroundColor='white'/>	
+				<Button raised icon={{name: 'user', color: 'black',type: 'font-awesome'}} backgroundColor='white'/>				
 			</View>
 		)
 	}

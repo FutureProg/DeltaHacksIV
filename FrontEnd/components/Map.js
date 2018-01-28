@@ -1,11 +1,16 @@
 import React from 'react';
 import MapView from 'react-native-maps';
+import MapViewDirections from 'react-native-maps-directions';
+
+const GOOGLE_API_KEY = "";
 
 class Map extends React.Component {
 
     constructor(props){
         super(props);
         this.onRegionChange = this.onRegionChange.bind(this);
+        this.getBike = this.getBike.bind(this);
+        this.getHub = this.getHub.bind(this);
     }
 
     componentWillMount(){
@@ -21,7 +26,7 @@ class Map extends React.Component {
     }
 
     componentDidMount() {        
-        const locationSuccess = (position) => {                
+        const locationSuccess = (position) => {                            
             this.setState({
                 region: {
                     latitude: position.coords.latitude,
@@ -40,11 +45,12 @@ class Map extends React.Component {
             this.setState({
                 markers: [...this.state.markers,{
                     "latlng": {
-                        "longitude": position.coords.latitude,
-                        "latitude": position.coords.longitude
+                        "latitude": position.coords.latitude,
+                        "longitude": position.coords.longitude,                        
                     }
                 }]
             })
+            this.getHub();
         };
         navigator.geolocation.getCurrentPosition(
             locationSuccess,
@@ -67,6 +73,7 @@ class Map extends React.Component {
         return fetch(url)
             .then((response) => response.json())
             .then((responseJson) => {
+                responseJson = JSON.parse(responseJson);
               this.setState({
                   markers: [...this.state.markers,{
                         "latlng": {
@@ -83,17 +90,19 @@ class Map extends React.Component {
             });
     }
 
-    getHub() { //heh
+    getHub() { //heh        
         let url = 'https://teovoinea.lib.id/bikeshare@dev/hub/?currentlat=' + this.state.region.latitude +  '&currentlon=' + this.state.region.longitude;
         return fetch(url)
             .then((response) => response.json())
-            .then((responseJson) => {
+            .then((responseJson) => {                                
+                responseJson = JSON.parse(responseJson);
+                console.log(responseJson);
               this.setState({
                   markers: [...this.state.markers,{
                         "latlng": {
                             "longitude": responseJson.lon,
                             "latitude": responseJson.lat
-                        },
+                        },                                                
                         "title": "Hub",
                         "description": "Super sweet hub"
                     }]
@@ -118,13 +127,20 @@ class Map extends React.Component {
             }}            
             region={this.state.region}
             onRegionChange={this.onRegionChange}
-            >
+            >                
+                <MapViewDirections
+                    origin={}                    
+                    destination={}
+                    waypoints={}
+                    apikey={}
+                />
                 {this.state.markers.map((marker,index) => (
                     <MapView.Marker
                         key={index}
                         coordinate={marker.latlng}
                         title={marker.title}
                         description={marker.description}
+                        onPress={(e=>console.log(e.nativeEvent))}
                     />
                 ))}
             </MapView>
