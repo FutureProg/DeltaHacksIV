@@ -20,7 +20,7 @@ class Map extends React.Component {
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421,
             },
-            markers: [],
+            markers: [],            
         });
     }
 
@@ -41,14 +41,21 @@ class Map extends React.Component {
                 latitudeDelta: 0.0043,
                 longitudeDelta: 0.0034                    
             })
-            this.setState({
-                markers: [...this.state.markers,{
-                    "latlng": {
-                        "latitude": position.coords.latitude,
-                        "longitude": position.coords.longitude,                        
-                    }
-                }]
-            })
+            const obj = {
+                "latlng": {
+                    "latitude": position.coords.latitude,
+                    "longitude": position.coords.longitude,                        
+                }
+            };
+            if(this.state.markers.length > 0){
+                this.setState({
+                    markers: [obj,...this.state.markers.slice(1)]
+                })
+            }else{
+                this.setState({
+                    markers: [obj]
+                });
+            }            
             this.getHub();
         };
         navigator.geolocation.getCurrentPosition(
@@ -65,7 +72,7 @@ class Map extends React.Component {
 
     componentWillUnmount() {
         navigator.geolocation.clearWatch(this.watchId);
-    }
+    }    
 
     getBike() {
         let url = 'https://teovoinea.lib.id/bikeshare@dev/bike/?currentlat=' + this.state.region.latitude +  '&currentlon=' + this.state.region.longitude;
@@ -74,14 +81,14 @@ class Map extends React.Component {
             .then((responseJson) => {
                 responseJson = JSON.parse(responseJson);
               this.setState({
-                  markers: [...this.state.markers,{
+                  markers: [{
                         "latlng": {
                             "longitude": responseJson.lon,
                             "latitude": responseJson.lat
                         },
                         "title": "Bike",
                         "description": "Super sweet bike"
-                    }]
+                    },...this.state.markers]
               })
             })
             .catch((error) => {
@@ -127,12 +134,31 @@ class Map extends React.Component {
             region={this.state.region}
             onRegionChange={this.onRegionChange}
             >                
-                <MapViewDirections
-                />
-                {this.state.markers.map((marker,index) => (
+                { this.state.markers.length > 0 && this.props.navDestination? 
+                    <MapViewDirections
+                        origin={this.state.markers[0].latlng}                    
+                        destination={this.props.navDestination.latlng}
+                        waypoints={this.state.markers.filter((item,index)=>{
+                            return index > 1
+                        }).map((item)=>item.latlng)}
+                        apikey={GOOGLE_API_KEY}
+                        strokeWidth={3}
+                        strokeColor="blue"
+                        mode="bicycling"
+                    />:null
+                }
+                {this.props.navDestination?
+                    <MapView.Marker                    
+                        coordinate={this.props.navDestination.latlng}
+                        title={this.props.navDestination.title}
+                        />
+                :null
+                }
+                {this.state.markers.map((marker,index) => (                    
                     <MapView.Marker
                         key={index}
                         coordinate={marker.latlng}
+                        pinColor={index == 0? "blue" : "pink"}
                         title={marker.title}
                         description={marker.description}
                         onPress={(e=>console.log(e.nativeEvent))}
