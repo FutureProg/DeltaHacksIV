@@ -3,9 +3,13 @@ import MapView from 'react-native-maps';
 
 class Map extends React.Component {
 
-    getInitialState() {
-        
-        return {
+    constructor(props){
+        super(props);
+        this.onRegionChange = this.onRegionChange.bind(this);
+    }
+
+    componentWillMount(){
+        this.setState({
             region: {
                 latitude: 37.78825,
                 longitude: -122.4324,
@@ -13,22 +17,44 @@ class Map extends React.Component {
                 longitudeDelta: 0.0421,
             },
             markers: [],
-        };
+        });
     }
 
-    componentDidMount() {
+    componentDidMount() {        
+        const locationSuccess = (position) => {                
+            this.setState({
+                region: {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    latitudeDelta: 0.0043,
+                    longitudeDelta: 0.0034
+                },
+                error: null,
+            });
+            this.map.animateToRegion({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                latitudeDelta: 0.0043,
+                longitudeDelta: 0.0034                    
+            })
+            this.setState({
+                markers: [...this.state.markers,{
+                    "latlng": {
+                        "longitude": position.coords.latitude,
+                        "latitude": position.coords.longitude
+                    }
+                }]
+            })
+        };
+        navigator.geolocation.getCurrentPosition(
+            locationSuccess,
+            (error) => {this.setState({ error: error.message });console.log(error.message)},
+            { enableHighAccuracy: false, timeout: 20000, maximumAge: 1000, distanceFilter: 10 },
+        )
         this.watchId = navigator.geolocation.watchPosition(
-            (position) => {
-                this.setState({
-                    region: {
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                    },
-                    error: null,
-                });
-            },
-            (error) => this.setState({ error: error.message }),
-            { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000, distanceFilter: 10 },
+            locationSuccess,
+            (error) => {this.setState({ error: error.message });console.log(error.message)},
+            { enableHighAccuracy: false, timeout: 20000, maximumAge: 1000, distanceFilter: 10 },
         );
     }
 
@@ -42,7 +68,7 @@ class Map extends React.Component {
             .then((response) => response.json())
             .then((responseJson) => {
               this.setState({
-                  markers: [{
+                  markers: [...this.state.markers,{
                         "latlng": {
                             "longitude": responseJson.lon,
                             "latitude": responseJson.lat
@@ -63,7 +89,7 @@ class Map extends React.Component {
             .then((response) => response.json())
             .then((responseJson) => {
               this.setState({
-                  markers: [{
+                  markers: [...this.state.markers,{
                         "latlng": {
                             "longitude": responseJson.lon,
                             "latitude": responseJson.lat
@@ -79,17 +105,23 @@ class Map extends React.Component {
     }
       
     onRegionChange(region) {
-       this.setState({ region });
+       //this.setState({ region });
     }
       
-    render() {
+    render() {              
         return (
             <MapView
+            ref={(m)=>{this.map = m}}
+            style={{
+                flex: 1,
+                zIndex: 0                                
+            }}            
             region={this.state.region}
             onRegionChange={this.onRegionChange}
             >
-                {this.state.markers.map(marker => (
+                {this.state.markers.map((marker,index) => (
                     <MapView.Marker
+                        key={index}
                         coordinate={marker.latlng}
                         title={marker.title}
                         description={marker.description}

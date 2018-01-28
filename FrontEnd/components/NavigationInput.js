@@ -5,7 +5,7 @@ class NavigationInput extends React.Component{
 
 	render(){
 		return (
-		<View style={{height: 'auto',paddingHorizontal: 20,}}>					
+		<View style={{paddingHorizontal: 20, paddingBottom:5, position: 'absolute', left: 0, top: 40, right: 0,zIndex:1}}>					
 			<TextInput 
 				style={styles.destinationInput}
 				underlineColorAndroid='transparent'
@@ -22,8 +22,8 @@ class NavigationInput extends React.Component{
 }
 
 const styles = {
-	destinationInput:{					
-		marginTop: -20,		
+	destinationInput:{
+		marginTop: 10,							
 		backgroundColor: "white",		
 		paddingHorizontal: 20,
 		borderRadius: 10,

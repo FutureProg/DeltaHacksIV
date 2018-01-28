@@ -22,7 +22,6 @@ export default HomeScreen;
 
 const styles = {
 	mainScreen:{
-		flex:1,
-		paddingTop:40,		
+		flex:1,				
 	},	
 };
