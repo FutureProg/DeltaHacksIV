@@ -6,12 +6,30 @@ import BottomOptions from '../components/BottomOptions';
 import Map from '../components/Map';
 
 class HomeScreen extends React.Component{	
+
+	constructor(props){
+		super(props);
+		this.onDestinationUpdate = this.onDestinationUpdate.bind(this);
+	}
+
+	componentWillMount(){
+		this.setState({
+			destination: null
+		})
+	}
+
+	onDestinationUpdate(obj){
+		this.setState({
+			destination: obj
+		});
+	}
+
 	render(){		
 		return (
 			<View style={styles.mainScreen}>	
-				<NavigationInput />				
+				<NavigationInput onDestinationUpdate={this.onDestinationUpdate} />				
 				<BottomOptions />		
-				<Map />												
+				<Map navDestination={this.state.destination} />												
 			</View>
 		)
 	}

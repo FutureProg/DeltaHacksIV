@@ -1,8 +1,23 @@
 import React from 'react';
 import {View, TextInput,Platform,Text} from 'react-native';
+import Geocoder from 'react-native-geocoding';
 
 class NavigationInput extends React.Component{
 
+	constructor(props){
+		super(props);
+		this.submitDestination = this.submitDestination.bind(this);
+	}
+	componentWillMount(){
+		this.setState({
+			destinationText: ""
+		});
+	}
+
+	submitDestination(){
+		console.log("Submit: " + this.state.destinationText);
+		Geocoder.getFromLocation(this.state.destinationText).then(
+			json => {
 	render(){
 		return (
 		<View style={{paddingHorizontal: 20, paddingBottom:5, position: 'absolute', left: 0, top: 40, right: 0,zIndex:1}}>					

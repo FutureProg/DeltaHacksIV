@@ -2,7 +2,6 @@ import React from 'react';
 import MapView from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 
-const GOOGLE_API_KEY = "";
 
 class Map extends React.Component {
 
@@ -129,10 +128,6 @@ class Map extends React.Component {
             onRegionChange={this.onRegionChange}
             >                
                 <MapViewDirections
-                    origin={}                    
-                    destination={}
-                    waypoints={}
-                    apikey={}
                 />
                 {this.state.markers.map((marker,index) => (
                     <MapView.Marker
