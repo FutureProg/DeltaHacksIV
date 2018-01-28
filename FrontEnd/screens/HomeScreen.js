@@ -3,13 +3,15 @@ import {View, TextInput,Platform,Text} from 'react-native';
 
 import NavigationInput from '../components/NavigationInput';
 import BottomOptions from '../components/BottomOptions';
+import Map from '../components/Map';
 
 class HomeScreen extends React.Component{	
 	render(){		
 		return (
 			<View style={styles.mainScreen}>	
 				<NavigationInput />				
-				<BottomOptions />														
+				<BottomOptions />		
+				<Map />												
 			</View>
 		)
 	}
