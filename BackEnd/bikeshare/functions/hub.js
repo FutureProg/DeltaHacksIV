@@ -5,28 +5,26 @@
 * @returns {string}
 */
 module.exports = (currentlat, currentlon, context, callback) => {
-    
-    var lat = parseInt(currentlat);
-    var lon = parseInt(currentlon);
+
+    var lat = parseFloat(currentlat);
+    var lon = parseFloat(currentlon);
     var shortestIndex = Number.MAX_SAFE_INTEGER;
     let shortestDistance = Number.MAX_SAFE_INTEGER;
-
+    
+    var dists = [];
     for (let i = 0; i < hubs.items.length; i++) {
-        let hub = hubs.items[i];
-        if (hub.available_bikes <= 0) {
-            continue;
-        }
-        let hublat = hub.middle_point.coordinates[0];
-        let hublon = hub.middle_point.coordinates[1];
-        let distance = Math.sqrt(Math.pow((lat - hublat), 2) + Math.pow((lon - hublon), 2))
-        if (distance < shortestIndex) {
+        let hub = hubs.items[i].middle_point.coordinates;
+        let distance = distanceCalc(hub[1], hub[0], lat, lon);
+        if (distance < shortestDistance) {
             shortestDistance = distance;
+            dists.push(distance);
             shortestIndex = i;
         }
     }
 
-    let retlat = hubs.items[shortestIndex].middle_point.coordinates[0];
-    let retlon = hubs.items[shortestIndex].middle_point.coordinates[1];
+    let retlat = hubs.items[shortestIndex].middle_point.coordinates[1];
+    let retlon = hubs.items[shortestIndex].middle_point.coordinates[0];
+    let retTitle = hubs.items[shortestIndex];
 
     let retobj = {
         lat: retlat,
@@ -36,6 +34,16 @@ module.exports = (currentlat, currentlon, context, callback) => {
     callback(null, JSON.stringify(retobj));
     
 };
+
+function distanceCalc(lat1, lon1, lat2, lon2) {
+    var p = 0.017453292519943295;    // Math.PI / 180
+    var c = Math.cos;
+    var a = 0.5 - c((lat2 - lat1) * p)/2 + 
+            c(lat1 * p) * c(lat2 * p) * 
+            (1 - c((lon2 - lon1) * p))/2;
+  
+    return 12742 * Math.asin(Math.sqrt(a)); // 2 * R; R = 6371 km
+}
 
 hubs = {
     "current_page":1,

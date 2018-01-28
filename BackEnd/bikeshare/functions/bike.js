@@ -5,35 +5,35 @@
 * @returns {string}
 */
 module.exports = (currentlat, currentlon, context, callback) => {
-    var lat = parseInt(currentlat);
-    var lon = parseInt(currentlon);
-    var shortestIndex = Number.MAX_SAFE_INTEGER;
-    let shortestDistance = Number.MAX_SAFE_INTEGER;
-
-    for (let i = 0; i < bikes.items.length; i++) {
-        let hub = bikes.items[i];
-        if (hub.available_bikes <= 0) {
-            continue;
+    
+        var lat = parseFloat(currentlat);
+        var lon = parseFloat(currentlon);
+        var shortestIndex = Number.MAX_SAFE_INTEGER;
+        let shortestDistance = Number.MAX_SAFE_INTEGER;
+        
+        var dists = [];
+        for (let i = 0; i < hubs.items.length; i++) {
+            let hub = hubs.items[i].current_position.coordinates;
+            let distance = distanceCalc(hub[1], hub[0], lat, lon);
+            if (distance < shortestDistance) {
+                shortestDistance = distance;
+                dists.push(distance);
+                shortestIndex = i;
+            }
         }
-        let hublat = hub.current_position.coordinates[0];
-        let hublon = hub.current_position.coordinates[1];
-        let distance = Math.sqrt(Math.pow((lat - hublat), 2) + Math.pow((lon - hublon), 2))
-        if (distance < shortestIndex) {
-            shortestDistance = distance;
-            shortestIndex = i;
+    
+        let retlat = hubs.items[shortestIndex].current_position.coordinates[1];
+        let retlon = hubs.items[shortestIndex].current_position.coordinates[0];
+        let retTitle = hubs.items[shortestIndex];
+    
+        let retobj = {
+            lat: retlat,
+            lon: retlon
         }
-    }
-
-    let retlat = bikes.items[shortestIndex].current_position.coordinates[0];
-    let retlon = bikes.items[shortestIndex].current_position.coordinates[1];
-
-    let retobj = {
-        lat: retlat,
-        lon: retlon
-    }
-
-    callback(null, JSON.stringify(retobj));
-};
+    
+        callback(null, JSON.stringify(retobj));
+        
+    };
     
 bikes = {
     "current_page":1,
