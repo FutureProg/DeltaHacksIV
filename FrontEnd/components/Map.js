@@ -10,6 +10,7 @@ class Map extends React.Component {
         this.onRegionChange = this.onRegionChange.bind(this);
         this.getBike = this.getBike.bind(this);
         this.getHub = this.getHub.bind(this);
+        this.updateTime = this.updateTime.bind(this);        
     }
 
     componentWillMount(){
@@ -22,6 +23,23 @@ class Map extends React.Component {
             },
             markers: [],            
         });
+    }
+
+    componentWillReceiveProps(nextProps){
+        console.log(this.props.dropOffOption + " : " + nextProps.dropOffOption)
+        if(this.props.navDestination != nextProps.navDestination){
+            this.updateTime(nextProps.navDestination);            
+        }
+        else if(this.props.dropOffOption != nextProps.dropOffOption){
+            console.log("FJDKSL");
+            this.setState({
+                markers: nextProps.dropOffOption? [
+                    ...this.state.markers.slice(0,2),
+                    nextProps.dropOffOption
+                ]:[...this.state.markers.slice(0,2)]
+            })
+            this.updateTime(nextProps.navDestination);    
+        }        
     }
 
     componentDidMount() {        
@@ -55,7 +73,8 @@ class Map extends React.Component {
                 this.setState({
                     markers: [obj]
                 });
-            }            
+            }    
+            this.props.onCurrentLocationUpdate(obj);        
             this.getHub();
         };
         navigator.geolocation.getCurrentPosition(
@@ -73,6 +92,35 @@ class Map extends React.Component {
     componentWillUnmount() {
         navigator.geolocation.clearWatch(this.watchId);
     }    
+
+    updateTime(lastDest){
+        var time = 0;
+        var dist = 0;
+        var finished = false;        
+        const list = [
+            ...this.state.markers,
+            lastDest
+        ]
+        var updateCount = 0;        
+        var i = 0;
+        for(; i < list.length-1;i++){            
+            const ORIG_LAT_LNG = list[i].latlng.latitude + "," + list[i].latlng.longitude;
+            const DEST_LAT_LNG = list[i+1].latlng.latitude + "," + list[i+1].latlng.longitude;
+            let url = "https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&mode=walking&origins="+ORIG_LAT_LNG+"&destinations="+DEST_LAT_LNG+"&key="+GOOGLE_API_KEY;
+            fetch(url)
+            .then((response)=>response.json())
+            .then((responseJson)=>{                
+                console.log(responseJson);                
+                time += responseJson.rows[0].elements[0].duration.value
+                dist += responseJson.rows[0].elements[0].distance.value     
+                updateCount++;                
+                if(updateCount == list.length-1){
+                    this.props.onTimeDistanceUpdate({time,dist});
+                }
+            })
+            .catch((error)=>{console.error(error.message);finished = true})            
+        }          
+    }
 
     getBike() {
         let url = 'https://teovoinea.lib.id/bikeshare@dev/bike/?currentlat=' + this.state.region.latitude +  '&currentlon=' + this.state.region.longitude;
@@ -144,17 +192,19 @@ class Map extends React.Component {
                         apikey={GOOGLE_API_KEY}
                         strokeWidth={3}
                         strokeColor="blue"
-                        mode="bicycling"
+                        mode="walking"
                     />:null
                 }
                 {this.props.navDestination?
                     <MapView.Marker                    
                         coordinate={this.props.navDestination.latlng}
                         title={this.props.navDestination.title}
+                        pinColor="orange"
                         />
                 :null
                 }
-                {this.state.markers.map((marker,index) => (                    
+                {this.state.markers.map((marker,index) => (     
+                    marker?               
                     <MapView.Marker
                         key={index}
                         coordinate={marker.latlng}
@@ -162,7 +212,7 @@ class Map extends React.Component {
                         title={marker.title}
                         description={marker.description}
                         onPress={(e=>console.log(e.nativeEvent))}
-                    />
+                    />:null
                 ))}
             </MapView>
         );
